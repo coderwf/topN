@@ -192,28 +192,58 @@ func (f64 Float64) Less(other Item) bool{
 	return f64 < other.(Float64)
 }
 
+type ScoreItem struct {
+	id            string
+	score         float64
+}
+
+func (si ScoreItem)Less(other Item) bool{
+	return si.score > other.(ScoreItem).score
+}
+
 ///example
+//about 10ms
 func main() {
 	rand.Seed(time.Now().Unix())
-	tn := NewTOPNP(1000)
-	intSlice := genRandInt(500000)
+	tn := NewTOPNP(2000)
+	itemSlice := genScoreItem(500000)
 	t1 := time.Now().Nanosecond()
 	for i := 0; i < 500000; i++ {
-		tn.Insert(Int(intSlice[i]))
+		tn.Insert(itemSlice[i])
 	}
 	t2 := time.Now().Nanosecond()
 	fmt.Println((t2-t1)/1e6, "ms")
-	fmt.Println(tn.TopNOrdered(1000))
+	topNItem := tn.TopNOrdered(2000)
+	fmt.Println(len(topNItem))
+	fmt.Println(topNItem)
 }
 
-//about 20 ms
+// less than 20 ms
+
 func genRandInt(num int) []int{
 	intSlice  := make([]int,num)
 	for i:=0;i<num;i++{
 		intSlice[i]  = rand.Intn(1000000)
 	}
-	fmt.Println(intSlice)
+	//fmt.Println(intSlice)
 	return intSlice
 }
 
+func genScoreItem(num int)[]Item{
+	itemSlice := make([]Item,num)
+	for i:=0;i<num;i++{
+		itemSlice[i]  = ScoreItem{genId(30),rand.Float64()*100}
+	}
+	return itemSlice
+}
 
+var s = "1234567890poiuytrewwqasdfghjklmnbvcxzIKLOMNJUYHBGTVFREDCXSWZQA"
+
+func genId(num int)string{
+	str := ""
+	for i:= 0;i<num;i++{
+		temp := string(s[rand.Intn(len(s))])
+		str  += temp
+	}
+	return str
+}
